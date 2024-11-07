@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRReview.ai - Automate Your GitHub PR Reviews</title>
+    <style>
+        :root {
+            --color-bg: #0f172a;
+            --color-primary: #8b5cf6;
+            --color-secondary: #6d28d9;
+            --color-text: #f8fafc;
+            --color-text-muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            color: var(--color-text);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 1.5rem;
+            position: relative;
+        }
+
+        nav ul li a {
+            color: var(--color-text);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: var(--color-primary);
+        }
+
+        /* Dropdown menu styling */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: rgba(30, 41, 59, 0.9);
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 0.5rem;
+            padding: 0.5rem 0;
+            z-index: 1;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-content a {
+            color: var(--color-text);
+            padding: 0.75rem 1rem;
+            display: block;
+            text-decoration: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .dropdown-content a:hover {
+            background-color: var(--color-primary);
+            color: var(--color-bg);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 6rem 0;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #8b5cf6, #d8b4fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            color: var(--color-text-muted);
+            max-width: 800px;
+            margin: 0 auto 3rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 1rem 2rem;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .button-primary {
+            background-color: var(--color-primary);
+            color: var(--color-text);
+        }
+
+        .button-primary:hover {
+            background-color: var(--color-secondary);
+            transform: translateY(-2px);
+        }
+
+        .button-secondary {
+            background-color: transparent;
+            color: var(--color-text);
+            border: 1px solid var(--color-primary);
+        }
+
+        .button-secondary:hover {
+            background-color: rgba(139, 92, 246, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            padding: 6rem 0;
+        }
+
+        .feature {
+            background-color: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(139, 92, 246, 0.1);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--color-primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .feature h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature p {
+            color: var(--color-text-muted);
+        }
+
+        footer {
+            background-color: rgba(15, 23, 42, 0.8);
+            padding: 3rem 0;
+            margin-top: auto;
+            background: transparent;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-section {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .footer-section h3 {
+            color: var(--color-primary);
+            margin-bottom: 1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section ul li a {
+            color: var(--color-text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section ul li a:hover {
+            color: var(--color-primary);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-icons a {
+            color: var(--color-text-muted);
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            color: var(--color-primary);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.25rem;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div class="container">
+        <header>
+            <div class="logo">PRReview.ai</div>
+            <nav>
+                <ul>
+                    <li class="dropdown">
+                        <a href="#features">Features</a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'code_review' %}">Code Analyzer</a>
+                            <a href="#smart-suggestions">Smart Suggestions</a>
+                            <a href="#security">Security First</a>
+                        </div>
+                    </li>
+                    <li><a href="{% url 'tutorial' %}">How It Works</a></li>
+                    <li> {% if user.is_authenticated %}
+                           <a href="{% url 'logout' %}">Logout</a>
+                          {% else %}
+                         <a href="{% url 'login' %}">Login</a>
+                         {% endif %}
+                    </li>
+
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <section class="hero">
+                <h1>Automate Your GitHub PR Reviews</h1>
+                <p>Streamline your development process with AI-powered code reviews. Get instant feedback, improve code quality, and ship faster with confidence.</p>
+                <div class="cta-buttons">
+                    <a href="{% url 'login' %}" class="button button-primary">Try for Free</a>
+                    <a href="{% url 'tutorial' %}" class="button button-secondary">How it Works</a>
+                </div>
+            </section>
+
+            <section id="features" class="features">
+                <div id="code-analyzer" class="feature">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Code Analyzer</h3>
+                    <p>Get immediate feedback on your pull requests with AI-powered analysis, saving hours of manual review time.</p>
+                </div>
+                <div id="smart-suggestions" class="feature">
+                    <div class="feature-icon">💡</div>
+                    <h3>Smart Suggestions</h3>
+                    <p>Receive intelligent code improvement suggestions and best practices tailored to your project's coding standards.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Fast Integration</h3>
+                    <p>Set up in minutes with our GitHub app and start reviewing code instantly. No complex configuration required.</p>
+                </div>
+                <div id="security" class="feature">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Security First</h3>
+                    <p>Our AI detects potential security vulnerabilities, ensuring your code is not only efficient but also secure.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <h3>Insightful Analytics</h3>
+                    <p>Gain valuable insights into your team's performance and code quality trends over time.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🤝</div>
+                    <h3>Team Collaboration</h3>
+                    <p>Enhance team productivity with shared review comments and automated code style enforcement.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>PRReview.ai</h3>
+                    <p>Empowering developers with AI-powered code reviews.</p>
+                    <p>Powered by SQLite database for efficient data management.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+
+                        <li><a href="auth.html">Login/Sign Up</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="{% url 'tutorial' %}">How It Works</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Support</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Connect</h3>
+                    <div class="social-icons">
+                        <a href="#" aria-label="Twitter">🐦</a>
+                        <a href="#" aria-label="GitHub">🐙</a>
+                        <a href="#" aria-label="LinkedIn">🔗</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Three.js scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // Particle system
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 5000;
+        const posArray = new Float32Array(particlesCount * 3);
+
+        for (let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 5;
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.005,
+            color: 0x8b5cf6
+        });
+
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        camera.position.z = 2;
+
+        // Mouse movement
+        let mouseX = 0;
+        let mouseY = 0;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = event.clientX / window.innerWidth - 0.5;
+            mouseY = event.clientY / window.innerHeight - 0.5;
+        });
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            particlesMesh.rotation.y += 0.001;
+            particlesMesh.rotation.x += 0.001;
+
+            // Particle wave effect
+            const positions = particlesGeometry.attributes.position.array;
+            for (let i = 0; i < positions.length; i += 3) {
+                const x = positions[i];
+                const y = positions[i + 1];
+                const z = positions[i + 2];
+
+                positions[i] = x + Math.sin(Date.now() * 0.001 + y) * 0.01;
+                positions[i + 1] = y + Math.cos(Date.now() * 0.002 + x) * 0.01;
+            }
+            particlesGeometry.attributes.position.needsUpdate = true;
+
+            // Mouse interaction
+            particlesMesh.rotation.y += mouseX * 0.05;
+            particlesMesh.rotation.x += mouseY * 0.05;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

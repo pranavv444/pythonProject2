@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial - PRReview.ai</title>
+    <style>
+        :root {
+            --color-bg: #0f172a;
+            --color-primary: #8b5cf6;
+            --color-secondary: #6d28d9;
+            --color-text: #f8fafc;
+            --color-text-muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(to bottom right, #0f172a, #4c1d95, #0f172a);
+            color: var(--color-text);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--color-primary);
+        }
+
+        .step {
+            background-color: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(139, 92, 246, 0.1);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .step h2 {
+            font-size: 1.5rem;
+            color: var(--color-primary);
+            margin-bottom: 1rem;
+        }
+
+        .step p {
+            margin-bottom: 1rem;
+        }
+
+        .step img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.25rem;
+            margin-top: 1rem;
+        }
+
+        .back-to-home {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .back-to-home a {
+            color: var(--color-text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .back-to-home a:hover {
+            color: var(--color-primary);
+        }
+
+         footer {
+            background-color: rgba(15, 23, 42, 0.8);
+            padding: 3rem 0;
+            margin-top: auto;
+            background: transparent;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-section {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .footer-section h3 {
+            color: var(--color-primary);
+            margin-bottom: 1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section ul li a {
+            color: var(--color-text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section ul li a:hover {
+            color: var(--color-primary);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-icons a {
+            color: var(--color-text-muted);
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            color: var(--color-primary);
+        }
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div class="container">
+        <h1>PRReview.ai</h1>
+        <h1>Setup Guide</h1>
+
+        <div class="step">
+            <h2>Step 1: Access Your GitHub Repository</h2>
+            <p>Navigate to the GitHub repository where you want to set up the PRReview.ai automation. Ensure you have the necessary permissions (typically admin rights) to add webhooks to this repository.</p>
+            <img src="placeholder-step1.jpg" alt="GitHub repository page">
+        </div>
+
+        <div class="step">
+            <h2>Step 2: Open Webhooks Settings</h2>
+            <p>In your repository, click on the "Settings" tab located in the top right of the page. Scroll down the sidebar on the left and select "Webhooks".</p>
+            <img src="placeholder-step2.jpg" alt="GitHub repository settings page">
+        </div>
+
+        <div class="step">
+            <h2>Step 3: Add New Webhook</h2>
+            <p>On the Webhooks page, click the "Add webhook" button to create a new webhook for PRReview.ai.</p>
+            <img src="placeholder-step3.jpg" alt="Add webhook button">
+        </div>
+
+        <div class="step">
+            <h2>Step 4: Enter Payload URL</h2>
+            <p>In the "Payload URL" field, paste the URL provided by PRReview.ai. This URL will receive the webhook data from GitHub.</p>
+            <img src="placeholder-step4.jpg" alt="Payload URL field">
+        </div>
+
+        <div class="step">
+            <h2>Step 5: Select Content Type</h2>
+            <p>Under "Content type", select "application/json". This setting ensures that GitHub sends JSON-formatted data to your webhook URL, which is the standard format and easily processed by our AI model.</p>
+            <img src="placeholder-step5.jpg" alt="Content type selection">
+        </div>
+
+        <div class="step">
+            <h2>Step 6: Choose Events to Trigger the Webhook</h2>
+            <p>Scroll down to the "Which events would you like to trigger this webhook?" section. Select "Let me select individual events". Then, scroll down and check the boxes for:</p>
+            <ul>
+                <li>Pushes</li>
+                <li>Pull requests</li>
+                <li>Pull request reviews</li>
+            </ul>
+            <p>At the bottom, ensure the "Active" checkbox is selected to enable the webhook.</p>
+            <p>Finally, click the "Add webhook" button to save your configuration.</p>
+            <img src="placeholder-step6.jpg" alt="Event selection and save button">
+        </div>
+
+        <div class="back-to-home">
+            <a href="{% url 'index' %}">Back to Home</a>
+        </div>
+    </div>
+
+ <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>PRReview.ai</h3>
+                    <p>Empowering developers with AI-powered code reviews.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="{% url 'tutorial' %}">How It Works</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Support</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Connect</h3>
+                    <div class="social-icons">
+                        <a href="#" aria-label="Twitter">🐦</a>
+                        <a href="#" aria-label="GitHub">🐙</a>
+                        <a href="#" aria-label="LinkedIn">🔗</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Three.js scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // Particle system
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 5000;
+        const posArray = new Float32Array(particlesCount * 3);
+
+        for (let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 5;
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.005,
+            color: 0x8b5cf6
+        });
+
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        camera.position.z = 2;
+
+        // Mouse movement
+        let mouseX = 0;
+        let mouseY = 0;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = event.clientX / window.innerWidth - 0.5;
+            mouseY = event.clientY / window.innerHeight - 0.5;
+        });
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            particlesMesh.rotation.y += 0.001;
+            particlesMesh.rotation.x += 0.001;
+
+            // Particle wave effect
+            const positions = particlesGeometry.attributes.position.array;
+            for (let i = 0; i < positions.length; i += 3) {
+                const x = positions[i];
+                const y = positions[i + 1];
+                const z = positions[i + 2];
+
+                positions[i] = x + Math.sin(Date.now() * 0.001 + y) * 0.01;
+                positions[i + 1] = y + Math.cos(Date.now() * 0.002 + x) * 0.01;
+            }
+            particlesGeometry.attributes.position.needsUpdate = true;
+
+            // Mouse interaction
+            particlesMesh.rotation.y += mouseX * 0.05;
+            particlesMesh.rotation.x += mouseY * 0.05;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

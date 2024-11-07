@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Analysis - PRReview.ai</title>
+    <style>
+        :root {
+            --color-bg: #0f172a;
+            --color-primary: #8b5cf6;
+            --color-secondary: #6d28d9;
+            --color-text: #f8fafc;
+            --color-text-muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(to bottom right, #0f172a, #4c1d95, #0f172a);
+            color: var(--color-text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            padding: 1rem 0;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 1.5rem;
+        }
+
+        nav ul li a {
+            color: var(--color-text);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: var(--color-primary);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem 0;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--color-primary);
+            text-align: center;
+        }
+
+        #code-analysis-form {
+            background-color: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(139, 92, 246, 0.1);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        textarea, input[type="file"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            background-color: rgba(15, 23, 42, 0.3);
+            border: 1px solid var(--color-text-muted);
+            border-radius: 0.25rem;
+            color: var(--color-text);
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--color-primary);
+            color: var(--color-text);
+            border: none;
+            border-radius: 0.25rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: var(--color-secondary);
+        }
+
+        #results {
+            background-color: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(139, 92, 246, 0.1);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        #results h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--color-primary);
+        }
+
+        #result-pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(88, 28, 135, 0.15));
+            padding: 2rem;
+            border-radius: 1rem;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--color-text);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        /* Scrollbar styling */
+        #result-pre::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        #result-pre::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.3);
+            border-radius: 0 1rem 1rem 0;
+        }
+
+        #result-pre::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--color-primary), var(--color-secondary));
+            border-radius: 5px;
+            border: 2px solid rgba(15, 23, 42, 0.3);
+        }
+
+        /* Headings */
+        #result-pre h2,
+        #result-pre h3,
+        #result-pre strong {
+            color: var(--color-primary);
+            font-weight: bold;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        #result-pre h2::before,
+        #result-pre h3::before,
+        #result-pre strong::before {
+            content: '►';
+            position: absolute;
+            left: 0;
+            color: var(--color-secondary);
+            opacity: 0.8;
+        }
+
+        /* Scores */
+        #result-pre span[data-score] {
+            display: inline-block;
+            padding: 0.2em 0.6em;
+            border-radius: 0.3rem;
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            margin: 0.2rem 0;
+        }
+
+        /* Code sections */
+        #result-pre code {
+            display: block;
+            background-color: rgba(30, 41, 59, 0.6);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-left: 3px solid var(--color-primary);
+            margin: 1rem 0;
+            font-size: 0.9em;
+        }
+
+        /* Lists and suggestions */
+        #result-pre ul {
+            list-style: none;
+            padding-left: 1.5rem;
+        }
+
+        #result-pre ul li::before {
+            content: '•';
+            color: var(--color-primary);
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+
+        /* Highlight important sections */
+        #result-pre [data-section] {
+            position: relative;
+            padding: 1rem;
+            margin: 1rem 0;
+            background: rgba(139, 92, 246, 0.05);
+            border-radius: 0.5rem;
+        }
+
+        #result-pre [data-section]::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--color-primary), transparent);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #result-pre > * {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            #result-pre {
+                padding: 1.5rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        footer {
+            background-color: rgba(15, 23, 42, 0.8);
+            padding: 3rem 0;
+            margin-top: auto;
+            background: transparent;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-section {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .footer-section h3 {
+            color: var(--color-primary);
+            margin-bottom: 1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section ul li a {
+            color: var(--color-text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section ul li a:hover {
+            color: var(--color-primary);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-icons a {
+            color: var(--color-text-muted);
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            color: var(--color-primary);
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            nav ul {
+                margin-top: 1rem;
+            }
+
+            nav ul li {
+                margin-left: 0;
+                margin-right: 1rem;
+            }
+
+            .footer-content {
+                flex-direction: column;
+            }
+        }
+
+        .loader {
+            text-align: center;
+            font-weight: bold;
+            color: var(--color-primary);
+            margin-top: 1rem;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        .logo-link {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div class="container">
+        <header>
+            <nav>
+              <a href="{% url 'index' %}" class="logo-link">
+        <div class="logo">PRReview.ai</div>
+    </a>
+                <ul>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="{% url 'tutorial' %}">How It Works</a></li>
+                     <li> {% if user.is_authenticated %}
+                           <a href="{% url 'logout' %}">Logout</a>
+                          {% else %}
+                         <a href="{% url 'login' %}">Login</a>
+                         {% endif %}
+                    </li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <h1>Code Analysis</h1>
+            <form id="code-analysis-form" enctype="multipart/form-data">
+                <label for="code-input">Enter your code:</label>
+                <textarea id="code-input" name="code_text" rows="10" cols="50"></textarea>
+
+                <label for="code-file">Or upload a code file:</label>
+                <input type="file" id="code-file" name="code_file" accept=".py,.js,.java,.txt">
+
+                <button type="button" onclick="submitCode()">Analyze Code</button>
+                      <div id="loader" class="loader" style="display: none;">Analyzing...</div>
+            </form>
+
+            <!-- Result Section -->
+            <div id="results">
+                <h2>Analysis Results</h2>
+                <pre id="result-pre"></pre>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>PRReview.ai</h3>
+                    <p>Empowering developers with AI-powered code reviews.</p>
+                    <p>Powered by SQLite database for efficient data management.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+
+                        <li><a href="#pricing">Pricing</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="{% url 'tutorial' %}">How It Works</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Support</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Connect</h3>
+                    <div class="social-icons">
+                        <a href="#" aria-label="Twitter">🐦</a>
+                        <a href="#" aria-label="GitHub">🐙</a>
+                        <a href="#" aria-label="LinkedIn">🔗</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // Three.js scene setup
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+    // Particle system
+    const particlesGeometry = new THREE.BufferGeometry();
+    const particlesCount = 5000;
+    const posArray = new Float32Array(particlesCount * 3);
+
+    for (let i = 0; i < particlesCount * 3; i++) {
+        posArray[i] = (Math.random() - 0.5) * 5;
+    }
+
+    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+    const particlesMaterial = new THREE.PointsMaterial({
+        size: 0.005,
+        color: 0x8b5cf6
+    });
+
+    const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+    scene.add(particlesMesh);
+
+    camera.position.z = 2;
+
+    // Mouse movement
+    let mouseX = 0;
+    let mouseY = 0;
+
+    document.addEventListener('mousemove', (event) => {
+        mouseX = event.clientX / window.innerWidth - 0.5;
+        mouseY = event.clientY / window.innerHeight - 0.5;
+    });
+
+    // Animation loop
+    function animate() {
+        requestAnimationFrame(animate);
+
+        particlesMesh.rotation.y += 0.001;
+        particlesMesh.rotation.x += 0.001;
+
+        // Particle wave effect
+        const positions = particlesGeometry.attributes.position.array;
+        for (let i = 0; i < positions.length; i += 3) {
+            const x = positions[i];
+            const y = positions[i + 1];
+            const z = positions[i + 2];
+
+            positions[i] = x + Math.sin(Date.now() * 0.001 + y) * 0.01;
+            positions[i + 1] = y + Math.cos(Date.now() * 0.002 + x) * 0.01;
+        }
+        particlesGeometry.attributes.position.needsUpdate = true;
+
+        // Mouse interaction
+        particlesMesh.rotation.y += mouseX * 0.05;
+        particlesMesh.rotation.x += mouseY * 0.05;
+
+        renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // Resize handler
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    async function submitCode() {
+        const form = document.getElementById('code-analysis-form');
+        const formData = new FormData(form);
+
+        try {
+          // Show loader
+      loader.style.display = 'block';
+
+            // Send the form data to the backend for processing
+            const response = await fetch('analyze-code/', {
+                method: 'POST',
+                body: formData,
+            });
+
+            // Convert the response to JSON format
+            const result = await response.json();
+
+            // Display the full result in the "Results" section
+            displayFullResult(result);
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('result-pre').textContent = 'An error occurred while analyzing the code. Please try again.';
+        }finally {
+      // Hide loader
+      loader.style.display = 'none';
+    }
+    }
+
+    // Function to display the full result in the "Results" section
+    function displayFullResult(result) {
+        const resultPre = document.getElementById('result-pre');
+
+        // Extract the values from the JSON object and join them with line breaks
+        const values = Object.values(result).map(value => {
+            return typeof value === 'object' ? JSON.stringify(value, null, 2) : value;
+        });
+
+        // Join the values with line breaks and remove '*' characters
+        let content = values.join('\n\n').replace(/\*/g, '');
+
+        // Bold keywords using regular expressions
+        content = content.replace(/(Accuracy|Optimization|Suggestions)/g, '<strong>$1</strong>');
+
+        // Set the HTML content (to apply the <strong> tags)
+        resultPre.innerHTML = content;
+    }
+
+    // Logout functionality (replace with actual logout logic)
+    function logout() {
+        alert('Logout functionality will be implemented with backend integration.');
+        window.location.href = 'auth.html';
+    }
+
+    // Add event listener for logout link
+    document.getElementById('logoutLink').addEventListener('click', logout);
+
+    // Initial '*' removal on page load if content exists in #result-pre
+    document.addEventListener("DOMContentLoaded", function() {
+        const resultPre = document.getElementById("result-pre");
+        if (resultPre) {
+            resultPre.innerHTML = resultPre.innerHTML.replace(/\*/g, '');
+        }
+    });
+</script>
+
+</body>
+</html>
